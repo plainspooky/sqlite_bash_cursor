@@ -21,12 +21,13 @@
 
 set -u
 
-VERSION='1'
-
 if [[ ${SQLITE_DEBUG} == true ]]; then
     RED=$( tput setaf 3 )
     RST=$( tput sgr0 )
 fi
+
+VERSION='1'
+SQLITE=$( which sqlite3 )
 
 sqlite_connect(){
     #
@@ -42,7 +43,7 @@ sqlite_connect(){
     local db="${1}"
     if [[ -f "${db}" ]]; then
         coproc CURSOR {
-            $( which sqlite3 ) -separator ${SQLITE_SEPARATOR} "${db}" ;
+            ${SQLITE} -separator ${SQLITE_SEPARATOR} "${db}" ;
         }
         SQLITEPID=$( jobs -l -r | grep 'CURSOR' )
         SQLITEPID=$( echo -n ${SQLITEPID} | cut -d\  -f2 )
@@ -102,7 +103,7 @@ sqlite_fetch(){
 sqlite_query(){
     #
     # sqlite_query:
-    # Sends a SQL query to the database.
+    # Sends a SQL query to database.
     #
     # Use:
     #   sqlite_query "<< SQL query >>"
