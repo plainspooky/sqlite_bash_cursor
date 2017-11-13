@@ -15,7 +15,7 @@ Use:
 
 Example:
 ``` bash
-	sqlite_connect "./db/database.db"
+sqlite_connect "./db/database.db"
 ```
 
 ### sqlite_disconnect
@@ -31,12 +31,11 @@ Fetches one line of query result and sends to STDOUT.
 Use:
 **sqlite_fetch**
 
-
 Example:
 ``` bash
-    sqlite_fetch | while read LINE; do
-       echo "${LINE}"
-    done
+sqlite_fetch | while read LINE; do
+   echo "${LINE}"
+done
 ```
 
 ### sqlite_query
@@ -48,7 +47,7 @@ Use:
 
 Example:
 ``` bash
-	sqlite_query "select id,name,address,phone from phonebook"
+sqlite_query "select id,name,address,phone from phonebook"
 ```
 
 ### sqlite_debug
@@ -60,5 +59,5 @@ Use:
 
 Example:
 ``` bash
-	sqlite_debug "Fetching record..."
+sqlite_debug "Fetching record..."
 ```
