@@ -26,8 +26,9 @@ if [[ ${SQLITE_DEBUG} == true ]]; then
     RST=$( tput sgr0 )
 fi
 
+# shellcheck disable=SC2034 # Todo refactor these ALLCAPS globals
 VERSION='1'
-SQLITE=$( which sqlite3 )
+SQLITE=$( command -v sqlite3 )
 
 sqlite_connect(){
     #
@@ -43,10 +44,9 @@ sqlite_connect(){
     local db="${1}"
     if [[ -f "${db}" ]]; then
         coproc CURSOR {
-            ${SQLITE} -separator ${SQLITE_SEPARATOR} "${db}" ;
+            ${SQLITE} -separator "${SQLITE_SEPARATOR}" "${db}" ;
         }
-        SQLITEPID=$( jobs -l -r | grep 'CURSOR' )
-        SQLITEPID=$( echo -n ${SQLITEPID} | cut -d\  -f2 )
+        SQLITEPID=$!
         SEND="${CURSOR[1]}"
         RECV="${CURSOR[0]}"
         sqlite_debug "SQLite's PID is ${SQLITEPID} and the file descriptors are '>&${SEND}' and '<&${RECV}'."
@@ -67,8 +67,8 @@ sqlite_disconnect(){
     #
     # There is no parameters.
     #
-    echo ".quit" >&${SEND?"Not connected!"}
-    [[ SQLITE_DEBUG ]] && sqlite_debug "Stoping coprocess."
+    echo ".quit" >&"${SEND?Not connected!}"
+    [[ $SQLITE_DEBUG ]] && sqlite_debug "Stoping coprocess."
 }
 
 
@@ -83,19 +83,19 @@ sqlite_fetch(){
     # There is no parameters.
     #
     sqlite_debug "Receiving from '<&${RECV}'."
-    local let sqlite_counter=-1
-    local let sqlite_line_fetch=''
-    while [[ true ]] ; do
+    local sqlite_counter=-1
+    local sqlite_line_fetch=''
+    while true; do
         # while loop runs in a subshell, needs a trick..
         if (( sqlite_counter == -1 )); then
             echo "select 'END OF QUERY';" >/proc/${SQLITEPID}/fd/0
         else
             sqlite_debug "Fetching #${sqlite_counter} from '<&${RECV}'."
         fi
-        read sqlite_line_fetch </proc/${SQLITEPID}/fd/1
+        read -r sqlite_line_fetch </proc/${SQLITEPID}/fd/1
         [[ "${sqlite_line_fetch}" = "END OF QUERY" ]] && break
         echo "${sqlite_line_fetch}"
-        let sqlite_counter++
+        ((sqlite_counter++)) || :
     done
 }
 
@@ -112,7 +112,7 @@ sqlite_query(){
     #   sqlite_query "select id,name,address,phone from phonebook"
     #
     sqlite_debug "Sending \`\`${1}\`\` to '>&${SEND}'."
-    echo -e "${1}\n;" >&${SEND}
+    echo -e "${1}\n;" >&"${SEND}"
 }
 
 

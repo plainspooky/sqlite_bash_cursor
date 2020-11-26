@@ -32,7 +32,7 @@ sqlite_query "INSERT INTO users (name,address,email,phone,sites) VALUES('Giovann
 # Query records
 #
 sqlite_query "select * from users"
-sqlite_fetch | while read LINE; do
+sqlite_fetch | while read -r LINE; do
    echo "${LINE}"
 done
 
